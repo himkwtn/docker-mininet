@@ -11,8 +11,7 @@ The Docker image for [Mininet](http://mininet.org/)
 
 ## Usage
 
-If you have installed [Docker Compose](https://docs.docker.com/compose/),
-you can run container with:
+Open xquartz
 
 ```bash
 docker-compose run --rm mininet
