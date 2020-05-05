@@ -85,9 +85,13 @@ class LearningSwitch (object):
 
     #***ADDED: Our firewall table
     self.firewall = {}
-    
     #***ADDED: Add the forwarding rule(s) for the firewall controller
-
+    dpidstr = dpid_to_str(connection.dpid)
+    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:01"))
+    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:02"))
+    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:03"), False)
+    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:04"))
+    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:05"))
     # We want to hear PacketIn messages, so we listen
     # to the connection
     connection.addListeners(self)
@@ -100,14 +104,18 @@ class LearningSwitch (object):
 
   #***ADDED: function that allows adding firewall rules into the firewall table
   def AddRule (self, dpidstr, src=0, value=True):
-    log.debug()
+    self.firewall[(dpidstr, src)] = value
+    log.info("Firewall rule added. (Switch DPID: %s, Source MAC adress:%s) = %s" % (dpidstr,src,value))
 
   #***ADDED: Check if the packet is compliant to rules before proceeding
   def CheckRule (self, dpidstr, src=0):
     try:
       entry = self.firewall[(dpidstr, src)]
+      log.info("Firewall rule for (Switch DPID: %s, Source MAC adress:%s) = %s" % (dpidstr,src,value))
+      return entry
     except KeyError:
-      log.debug()
+      log.debug("Key error %s" % (KeyError))
+      return False
 
   def _handle_PacketIn (self, event):
     """
@@ -166,7 +174,7 @@ class LearningSwitch (object):
     dpidstr = dpid_to_str(event.connection.dpid)
 
     #***Added: Check the firewall rules
-    if 
+    if not self.CheckRule(dpidstr,packet.src):
       drop()
       return
 
