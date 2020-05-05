@@ -27,6 +27,7 @@ from pox.lib.util import str_to_bool
 #***ADDED
 from pox.lib.addresses import EthAddr
 import time
+import json
 
 log = core.getLogger()
 
@@ -87,11 +88,12 @@ class LearningSwitch (object):
     self.firewall = {}
     #***ADDED: Add the forwarding rule(s) for the firewall controller
     dpidstr = dpid_to_str(connection.dpid)
-    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:01"))
-    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:02"))
-    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:03"), False)
-    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:04"))
-    self.AddRule(dpidstr,EthAddr("00:00:00:00:00:05"))
+    self.AddRule(dpidstr,"00:00:00:00:00:01")
+    self.AddRule(dpidstr,"00:00:00:00:00:02")
+    self.AddRule(dpidstr,"00:00:00:00:00:03", False)
+    self.AddRule(dpidstr,"00:00:00:00:00:04")
+    self.AddRule(dpidstr,"00:00:00:00:00:05")
+    log.info("Firewall: %s" % self.firewall)
     # We want to hear PacketIn messages, so we listen
     # to the connection
     connection.addListeners(self)
@@ -104,14 +106,14 @@ class LearningSwitch (object):
 
   #***ADDED: function that allows adding firewall rules into the firewall table
   def AddRule (self, dpidstr, src=0, value=True):
-    self.firewall[(dpidstr, src)] = value
-    log.info("Firewall rule added. (Switch DPID: %s, Source MAC adress:%s) = %s" % (dpidstr,src,value))
+    self.firewall[(dpidstr, EthAddr(src))] = value
+    log.info("Firewall rule added. (Switch DPID: %s, Source MAC adress: %s) = %s" % (dpidstr,src,value))
 
   #***ADDED: Check if the packet is compliant to rules before proceeding
   def CheckRule (self, dpidstr, src=0):
     try:
       entry = self.firewall[(dpidstr, src)]
-      log.info("Firewall rule for (Switch DPID: %s, Source MAC adress:%s) = %s" % (dpidstr,src,value))
+      log.info("Firewall rule for (%s, %s) = %s" % (dpidstr,src,entry))
       return entry
     except KeyError:
       log.debug("Key error %s" % (KeyError))
@@ -176,8 +178,9 @@ class LearningSwitch (object):
     #***Added: Check the firewall rules
     if not self.CheckRule(dpidstr,packet.src):
       drop()
+      log.info("Dropping packet.")
       return
-
+    log.info("Forwarding packet")
     if not self.transparent: # 2
       if packet.type == packet.LLDP_TYPE or packet.dst.isBridgeFiltered():
         drop() # 2a
