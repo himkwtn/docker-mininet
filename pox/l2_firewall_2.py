@@ -92,7 +92,7 @@ class LearningSwitch (object):
     self.AddRule(dpidstr,"00:00:00:00:00:02")
     self.AddRule(dpidstr,"00:00:00:00:00:03", False)
     self.AddRule(dpidstr,"00:00:00:00:00:04")
-    self.AddRule(dpidstr,"00:00:00:00:00:05")
+    self.AddRule(dpidstr,"00:00:00:00:00:05", False)
     # We want to hear PacketIn messages, so we listen
     # to the connection
     connection.addListeners(self)
