@@ -104,8 +104,9 @@ class LearningSwitch (object):
     #          str(self.transparent))
 
   #***ADDED: function that allows adding firewall rules into the firewall table
-  def AddRule (self, dpidstr, src=0, value=True):
-    self.firewall[(dpidstr, EthAddr(src))] = value
+  def AddRule (self, dpidstr, src, value=True):
+    src=EthAddr(src)
+    self.firewall[(dpidstr, src)] = value
     log.info("Firewall rule added. (Switch DPID: %s, Source MAC adress: %s) = %s" % (dpidstr,src,value))
 
   #***ADDED: Check if the packet is compliant to rules before proceeding
